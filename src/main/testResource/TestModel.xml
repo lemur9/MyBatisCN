@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testModels>
+    <testModel default="me">
+        <id>1</id>
+        <name>Lemur</name>
+        <age>22</age>
+    </testModel>
+    <testModel>
+        <id>2</id>
+        <name>rosy</name>
+        <age>23</age>
+    </testModel>
+</testModels>
