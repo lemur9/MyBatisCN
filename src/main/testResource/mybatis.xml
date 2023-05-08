@@ -43,6 +43,7 @@
         <mapper resource="TestModelMapper.xml"/>
 <!--        <package name=""/>-->
         <package name="interceptor.mapper"/>
+        <package name="day01_understand.dao"/>
     </mappers>
 </configuration>
 
