@@ -28,6 +28,7 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
+import org.apache.ibatis.type.IntegerTypeHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -73,7 +74,7 @@ public class ToolTest {
         configuration.addMappedStatement(mappedStatement);*/
 
         //2.交由mybatis解析并构建出MappedStatement对象
-        configuration.addMappers(TestModelMapper.class.getPackage().getName());
+//        configuration.addMappers(TestModelMapper.class.getPackage().getName());
         return configuration;
     }
 
@@ -131,7 +132,6 @@ public class ToolTest {
         XMLConfigBuilder xmlConfigBuilder = new XMLConfigBuilder(Resources.getResourceAsReader("mybatis.xml"));
         Configuration configuration = xmlConfigBuilder.parse();
 
-
         SqlSessionFactoryBuilder sqlSessionFactoryBuilder = new SqlSessionFactoryBuilder();
         SqlSessionFactory sqlSessionFactory = sqlSessionFactoryBuilder.build(configuration);
         sqlSession = sqlSessionFactory.openSession(true);
@@ -188,25 +188,33 @@ public class ToolTest {
     }
 
     @Test
-    public void testMappedStatement() throws Exception {
-        XMLConfigBuilder xmlConfigBuilder = new XMLConfigBuilder(Resources.getResourceAsReader("mybatis.xml"));
-        Configuration configuration = xmlConfigBuilder.parse();
+    public void testMappedStatement() {
+
+        Configuration configuration = getConfiguration();
 
         String sql = "select * from user";
         SqlSource staticSqlSource = new StaticSqlSource(configuration, sql);
 
-        ResultMapping.Builder idBuilder = new ResultMapping.Builder(configuration, "id","id",new StringTypeHandler());
-        ResultMapping resultMapping = idBuilder.build();
+        ResultMapping idResultMapping = new ResultMapping.Builder(configuration, "id", "id", new IntegerTypeHandler()).build();
+        ResultMapping createTimeResultMapping = new ResultMapping.Builder(configuration, "create_time", "createTime", new StringTypeHandler()).build();
+        ResultMapping ResultMapping = new ResultMapping.Builder(configuration, "name", "name", new StringTypeHandler()).build();
+        ResultMapping passwordResultMapping = new ResultMapping.Builder(configuration, "password", "password", new StringTypeHandler()).build();
+        ResultMapping phoneResultMapping = new ResultMapping.Builder(configuration, "phone", "phone", new StringTypeHandler()).build();
+        ResultMapping nickNamResultMapping = new ResultMapping.Builder(configuration, "nick_name", "nickName", String.class).build();
+
 
         List<ResultMapping> resultMappings = new ArrayList<>();
-        resultMappings.add(resultMapping);
+        resultMappings.add(idResultMapping);
+        resultMappings.add(createTimeResultMapping);
+        resultMappings.add(ResultMapping);
+        resultMappings.add(passwordResultMapping);
+        resultMappings.add(phoneResultMapping);
+        resultMappings.add(nickNamResultMapping);
 
-        ResultMap.Builder resultMapBuilder = new ResultMap.Builder(configuration, "selectUser", TestModel.class, resultMappings);
+//        Discriminator discriminator = new Discriminator.Builder(configuration, resultMapping, new HashMap<>()).build();
+//        resultMapBuilder.discriminator(discriminator);
 
-        Discriminator discriminator = new Discriminator.Builder(configuration, resultMapping, new HashMap<>()).build();
-
-        resultMapBuilder.discriminator(discriminator);
-        ResultMap resultMap = resultMapBuilder.build();
+        ResultMap resultMap = new ResultMap.Builder(configuration, "selectUser", TestModel.class, resultMappings).build();
 
         List<ResultMap> resultMaps = new ArrayList<>();
         resultMaps.add(resultMap);
@@ -214,6 +222,19 @@ public class ToolTest {
         MappedStatement.Builder mappedStatementBuilder = new MappedStatement.Builder(configuration, "select", staticSqlSource, SqlCommandType.SELECT);
         mappedStatementBuilder.resultMaps(resultMaps);
         MappedStatement mappedStatement = mappedStatementBuilder.build();
+
+        configuration.addMappedStatement(mappedStatement);
+
+        BoundSql boundSql = mappedStatement.getBoundSql(null);
+        String staticSql = boundSql.getSql();
+        System.out.println(staticSql);
+
+        SqlSessionFactoryBuilder sqlSessionFactoryBuilder = new SqlSessionFactoryBuilder();
+        SqlSessionFactory sqlSessionFactory = sqlSessionFactoryBuilder.build(configuration);
+        sqlSession = sqlSessionFactory.openSession(true);
+
+        List<TestModel> objects = sqlSession.selectList("select");
+        System.out.println(objects);
 
     }
 }
