@@ -45,18 +45,22 @@ import org.apache.ibatis.session.Configuration;
  *   但是这里面的
  */
 public final class MappedStatement {
-  // Mapper文件的磁盘路径
+  // Mapper文件的磁盘路径(源自于哪个mapper文件)
   private String resource;
   // Configuration对象
   private Configuration configuration;
   // 查询语句的完整包名加方法名，例如：com.github.yeecode.mybatisdemo.dao.UserMapper.addUser
   private String id;
+  // 每次从服务器获取的数量
   private Integer fetchSize;
   private Integer timeout;
+  // STATEMENT，PREPARED，CALLABLE
   private StatementType statementType;
   private ResultSetType resultSetType;
-  //SQL源码，对应于我们所写在配置文件中的SQL语句。包含占位符，无法直接执行。可以展开分析就是分行的sql语句text。
+  //  SQL源码，对应于我们所写在配置文件中的SQL语句。包含占位符，无法直接执行。可以展开分析就是分行的sql语句text。
+  //  对sql的包装
   private SqlSource sqlSource;
+  // 缓存
   private Cache cache;
   // 参数们
   private ParameterMap parameterMap;
@@ -69,6 +73,7 @@ public final class MappedStatement {
   private boolean resultOrdered;
   // 类型，增删改查
   private SqlCommandType sqlCommandType;
+  // 主键生成器
   private KeyGenerator keyGenerator;
   // 存储了主键的属性名
   private String[] keyProperties;

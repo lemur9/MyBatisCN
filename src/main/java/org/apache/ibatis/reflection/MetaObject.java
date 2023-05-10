@@ -48,14 +48,20 @@ public class MetaObject {
     this.objectWrapperFactory = objectWrapperFactory;
     this.reflectorFactory = reflectorFactory;
 
+    //1.如果object是一个对象包装器直接赋值给objectWrapper
     if (object instanceof ObjectWrapper) {
       this.objectWrapper = (ObjectWrapper) object;
+      //2.ObjectWrapperFactory中是否提供有object的包装类，如果有使用自己的包装器
+      //可以自己提供ObjectWrapperFactory的子实现类进行拓展
     } else if (objectWrapperFactory.hasWrapperFor(object)) {
       this.objectWrapper = objectWrapperFactory.getWrapperFor(this, object);
+      //3.如果object属于Map则创建一个MapWrapper
     } else if (object instanceof Map) {
       this.objectWrapper = new MapWrapper(this, (Map) object);
+      //4.如果object属于Collection则创建一个CollectionWrapper
     } else if (object instanceof Collection) {
       this.objectWrapper = new CollectionWrapper(this, (Collection) object);
+      //5.如果都不属于，则创建一个最基本的BeanWrapper，元对象为Object
     } else {
       this.objectWrapper = new BeanWrapper(this, object);
     }
