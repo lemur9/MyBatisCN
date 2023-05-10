@@ -12,9 +12,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TestModel {
     private Integer id;
-    private String create_time;
+    private String createTime;
     private String name;
     private String password;
     private String phone;
-    private String nick_nam;
+    private String nickName;
 }
