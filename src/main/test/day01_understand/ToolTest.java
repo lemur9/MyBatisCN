@@ -1,6 +1,7 @@
 package day01_understand;
 
 import day01_understand.dao.TestModelMapper;
+import day01_understand.demo.Account;
 import day01_understand.demo.Dept;
 import day01_understand.demo.Employee;
 import day01_understand.demo.TestModel;
@@ -23,6 +24,7 @@ import org.apache.ibatis.reflection.DefaultReflectorFactory;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.factory.DefaultObjectFactory;
 import org.apache.ibatis.reflection.wrapper.DefaultObjectWrapperFactory;
+import org.apache.ibatis.scripting.xmltags.XMLLanguageDriver;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -237,4 +239,30 @@ public class ToolTest {
         System.out.println(objects);
 
     }
+
+    @Test
+    public void testXMLLanguageDriver() throws Exception {
+        XMLLanguageDriver xmlLanguageDriver = new XMLLanguageDriver();
+        XPathParser xPathParser = new XPathParser(Resources.getResourceAsStream("sql.xml"));
+        XNode dynamicSql = xPathParser.evalNode("/select");
+        SqlSource sqlSource = xmlLanguageDriver.createSqlSource(getConfiguration(), dynamicSql, Account.class);
+        BoundSql boundSql = sqlSource.getBoundSql(new Account(1,"lemur",33.3));
+        String sql = boundSql.getSql();
+        System.out.println(sql);
+
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

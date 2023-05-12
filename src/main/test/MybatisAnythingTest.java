@@ -201,7 +201,9 @@ public class MybatisAnythingTest {
         SqlSession sqlSession = sessionFactory.openSession();
         TestModelMapper mapper = sqlSession.getMapper(TestModelMapper.class);
         List<TestModel> testModels = mapper.selectAll("2", "Lemur", "男");
+        List<TestModel> testModelList = mapper.selectById("2");
         testModels.forEach(System.out::println);
+        testModelList.forEach(System.out::println);
     }
 
     @Test
