@@ -64,10 +64,10 @@ public class MybatisAnythingTest {
      */
     @Test
     public void testOr() {
-        int a = 6;
-        int b = 5;
-        a |= b;
-        System.out.println(a);
+        int a = 6; // 0 0 0 0 0 1 1 0
+        int b = 5; // 0 0 0 0 0 1 0 1
+        a |= b;    // 0 0 0 0 0 1 1 1
+        System.out.println(a); // 7
     }
 
     /**
@@ -201,7 +201,9 @@ public class MybatisAnythingTest {
         SqlSession sqlSession = sessionFactory.openSession();
         TestModelMapper mapper = sqlSession.getMapper(TestModelMapper.class);
         List<TestModel> testModels = mapper.selectAll("2", "Lemur", "男");
+        List<TestModel> testModelList = mapper.selectById("2");
         testModels.forEach(System.out::println);
+        testModelList.forEach(System.out::println);
     }
 
     @Test

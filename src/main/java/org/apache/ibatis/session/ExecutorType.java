@@ -21,6 +21,6 @@ package org.apache.ibatis.session;
 public enum ExecutorType {
 
   SIMPLE, // 为每个语句创建新的预处理语句
-  REUSE,  // 复用
-  BATCH   // 执行批量操作
+  REUSE,  // 复用,会重用预处理语句
+  BATCH   // 重用语句并执行批量操作
 }

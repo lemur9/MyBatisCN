@@ -9,4 +9,6 @@ public interface TestModelMapper {
 
     //@Select("select * from user")
     List<TestModel> selectAll(String id, String name, String sex);
+
+    List<TestModel> selectById(String s);
 }
