@@ -17,6 +17,10 @@
         <typeAlias type="interceptorTest.DictInterceptor" alias="dictInterceptor"/>
     </typeAliases>
 
+    <typeHandlers>
+        <typeHandler handler="day01_understand.handler.EmployeeHandler"/>
+    </typeHandlers>
+
     <plugins>
         <plugin interceptor="dictInterceptor">
             <property name="preInfo" value="本次查询记录数"/>

@@ -54,6 +54,7 @@ public class SqlSessionFactoryBuilder {
   public SqlSessionFactory build(Reader reader, String environment, Properties properties) {
     try {
       // 传入配置文件，创建一个XMLConfigBuilder类
+      //用于配置和初始化MyBatis的运行时环境
       XMLConfigBuilder parser = new XMLConfigBuilder(reader, environment, properties);
       // 分两步：
       // 1、解析配置文件，得到配置文件对应的Configuration对象

@@ -7,4 +7,10 @@
         select *
         from user
     </select>
+
+    <select id="selectEmployee" resultType="day01_understand.demo.Employee">
+        select e.id, e.name, d.id as dept_id, d.name as dept_name
+        from employee e
+                 join dept d on e.dept_id = d.id
+    </select>
 </mapper>

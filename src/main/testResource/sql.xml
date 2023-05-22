@@ -1,0 +1,20 @@
+<root>
+    <select>
+        select id,user_name,money from account
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="userName !=null and userName !=''">
+                and user_name = #{userName}
+            </if>
+            <if test="money !=null">
+                and money = #{money}
+            </if>
+        </where>
+    </select>
+
+    <sql>
+        select * from account
+    </sql>
+</root>

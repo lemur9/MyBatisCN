@@ -29,3 +29,8 @@ insert into dept (id, name) values(2,'财务部门');
 insert into dept (id, name) values(3,'技术研发部门');
 insert into dept (id, name) values(4,'销售部门');
 insert into dept (id, name) values(5,'市场营销部门');
+
+
+insert into account (id, user_name, money) values(1,'lemur', 5000);
+insert into account (id, user_name, money) values(2,'fangmu', 10000);
+insert into account (id, user_name, money) values(3,'xiaoming', 1000);

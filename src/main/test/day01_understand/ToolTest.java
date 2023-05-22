@@ -1,9 +1,11 @@
 package day01_understand;
 
 import day01_understand.dao.TestModelMapper;
+import day01_understand.demo.Account;
 import day01_understand.demo.Dept;
 import day01_understand.demo.Employee;
 import day01_understand.demo.TestModel;
+import day01_understand.handler.EmployeeHandler;
 import day01_understand.utils.StringTypeHandler;
 import ognl.Ognl;
 import ognl.OgnlException;
@@ -13,6 +15,7 @@ import org.apache.ibatis.builder.xml.XMLMapperEntityResolver;
 import org.apache.ibatis.datasource.pooled.PooledDataSource;
 import org.apache.ibatis.exceptions.ExceptionFactory;
 import org.apache.ibatis.executor.ErrorContext;
+import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.jdbc.ScriptRunner;
 import org.apache.ibatis.logging.slf4j.Slf4jImpl;
@@ -23,10 +26,11 @@ import org.apache.ibatis.reflection.DefaultReflectorFactory;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.factory.DefaultObjectFactory;
 import org.apache.ibatis.reflection.wrapper.DefaultObjectWrapperFactory;
-import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.apache.ibatis.scripting.xmltags.XMLLanguageDriver;
+import org.apache.ibatis.session.*;
+import org.apache.ibatis.session.defaults.DefaultSqlSession;
+import org.apache.ibatis.transaction.Transaction;
+import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 import org.apache.ibatis.type.IntegerTypeHandler;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,11 +39,22 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * 流程解读
+ * sqlSessionFactory 的初始化主要是解析配置文件，解析mapper文件，
+ *      和关键对象的创建：Environment对象，Configuration对象，MappedStatement对象
+ *      关联对象：SqlSource接口实现类（4个），ResultMap
+ * sqlSession 的初始化主要是获取执行器类型，创建事务，
+ *
+ */
 public class ToolTest {
 
     SqlSession sqlSession;
@@ -53,6 +68,7 @@ public class ToolTest {
         properties.put("password", "");
         configuration.setVariables(properties);
         configuration.setLogImpl(Slf4jImpl.class);
+        //开启下划线映射
         configuration.setMapUnderscoreToCamelCase(true);
         configuration.getTypeAliasRegistry().registerAliases(TestModel.class.getPackage().getName());
         JdbcTransactionFactory jdbcTransactionFactory = new JdbcTransactionFactory();
@@ -188,7 +204,7 @@ public class ToolTest {
     }
 
     @Test
-    public void testMappedStatement() {
+    public void testMappedStatement() throws IOException {
 
         Configuration configuration = getConfiguration();
 
@@ -237,4 +253,99 @@ public class ToolTest {
         System.out.println(objects);
 
     }
+
+    //使用TypeHandlerRegistry注册
+    @Test
+    public void testTypeHandler() throws Exception {
+        SqlSessionFactoryBuilder sqlSessionFactoryBuilder = new SqlSessionFactoryBuilder();
+        SqlSessionFactory build = sqlSessionFactoryBuilder.build(Resources.getResourceAsReader("mybatis.xml"));
+        Configuration configuration = build.getConfiguration();
+        configuration.getTypeHandlerRegistry().register(EmployeeHandler.class);
+        SqlSession sqlSession = build.openSession(true);
+        List<Employee> objects = sqlSession.selectList("day01_understand.dao.TestModelMapper.selectEmployee");
+        System.out.println(objects);
+    }
+
+    //用来解析动态sql到静态sql
+    @Test
+    public void testXMLLanguageDriver() throws Exception {
+        XMLLanguageDriver xmlLanguageDriver = new XMLLanguageDriver();
+        XPathParser xPathParser = new XPathParser(Resources.getResourceAsStream("sql.xml"));
+        XNode dynamicSql = xPathParser.evalNode("/select");
+        SqlSource sqlSource = xmlLanguageDriver.createSqlSource(getConfiguration(), dynamicSql, Account.class);
+        BoundSql boundSql = sqlSource.getBoundSql(new Account(1, "lemur", 33));
+        String sql = boundSql.getSql();
+        System.out.println(sql);
+
+    }
+
+    //测试手动解析xml文件并查询
+    @Test
+    public void testParseXML() throws IOException {
+        Configuration configuration = getConfiguration();
+
+        XPathParser xPathParser = new XPathParser(Resources.getResourceAsStream("sql.xml"));
+        XNode xNode = xPathParser.evalNode("//sql");
+
+        XMLLanguageDriver xmlLanguageDriver = new XMLLanguageDriver();
+        SqlSource sqlSource = xmlLanguageDriver.createSqlSource(configuration, xNode, Account.class);
+
+        new ResultMapping.Builder(configuration, "id", "id", Integer.class);
+        new ResultMapping.Builder(configuration, "userName", "user_name", String.class);
+        new ResultMapping.Builder(configuration, "money", "money", Integer.class);
+
+        List<ResultMapping> resultMappings = new ArrayList<>();
+
+        ResultMap resultMap = new ResultMap.Builder(configuration, "id", Account.class, resultMappings).build();
+
+        List<ResultMap> resultMaps = new ArrayList<>();
+        resultMaps.add(resultMap);
+
+        MappedStatement selectAccount = new MappedStatement.Builder(configuration, "selectAccount", sqlSource, SqlCommandType.SELECT).resultMaps(resultMaps).build();
+
+        configuration.addMappedStatement(selectAccount);
+
+        SqlSessionFactoryBuilder sqlSessionFactoryBuilder = new SqlSessionFactoryBuilder();
+        SqlSessionFactory build = sqlSessionFactoryBuilder.build(configuration);
+        SqlSession sqlSession = build.openSession(true);
+        List<Account> account = sqlSession.selectList("selectAccount");
+        System.out.println(account);
+    }
+
+    //解释sqlSession的创建
+    @Test
+    public void testOpenSession() throws IOException {
+        SqlSessionFactoryBuilder sqlSessionFactoryBuilder = new SqlSessionFactoryBuilder();
+        SqlSessionFactory build = sqlSessionFactoryBuilder.build(Resources.getResourceAsReader("mybatis.xml"));
+        Configuration configuration = build.getConfiguration();
+
+        final Environment environment = configuration.getEnvironment();
+        // 从环境中获取事务工厂
+        final TransactionFactory transactionFactory = environment.getTransactionFactory();
+        // 从事务工厂中生产事务
+        Transaction tx = transactionFactory.newTransaction(environment.getDataSource(), null, Boolean.TRUE);
+        // 创建执行器
+        final Executor executor = configuration.newExecutor(tx, ExecutorType.SIMPLE);
+        // 创建DefaultSqlSession对象
+        SqlSession sqlSession = new DefaultSqlSession(configuration, executor, Boolean.TRUE);
+
+        List<Employee> objects = sqlSession.selectList("day01_understand.dao.TestModelMapper.selectEmployee");
+
+        sqlSession.close();
+        System.out.println(objects);
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
