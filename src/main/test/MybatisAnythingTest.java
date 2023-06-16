@@ -258,4 +258,16 @@ public class MybatisAnythingTest {
         user.forEach(System.out::println);
     }
 
+    boolean flag = false;
+
+    @Test
+    public void testDebug() {
+        for (int i = 1; i < 100; i++) {
+            if (flag) {
+                System.out.println(i);
+            }
+        }
+    }
 }
+
+

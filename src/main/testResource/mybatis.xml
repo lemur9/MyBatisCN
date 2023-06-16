@@ -39,6 +39,11 @@
         </environment>
     </environments>
 
+    <databaseIdProvider type="DB_VENDOR">
+        <property name="MYSQL" value="mysql"/>
+        <property name="HSQL Database Engine" value="hsql"/>
+    </databaseIdProvider>
+
     <!-- sql mapper(sql映射文件)的位置-->
     <mappers>
         <!--

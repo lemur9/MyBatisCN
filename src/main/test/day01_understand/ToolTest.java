@@ -34,6 +34,7 @@ import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 import org.apache.ibatis.type.IntegerTypeHandler;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -120,6 +121,7 @@ public class ToolTest {
     }
 
     @Test
+    @DisplayName("测试XPath解析xml")
     public void testXml() {
         try {
             XPathParser xPathParser = new XPathParser(Resources.getResourceAsStream("mybatis.xml"), true, null, new XMLMapperEntityResolver());
@@ -131,6 +133,7 @@ public class ToolTest {
     }
 
     @Test
+    @DisplayName("测试Mapper代理")
     public void testConfiguration() {
         //1.直接通过MappedStatement调用
         List<Object> objects = sqlSession.selectList("day01_understand.dao.TestModelMapper.selectAll");
@@ -144,6 +147,7 @@ public class ToolTest {
     }
 
     @Test
+    @DisplayName("测试XMLConfigBuilder解析配置文件")
     public void tesXMLConfigBuilder() throws IOException {
         XMLConfigBuilder xmlConfigBuilder = new XMLConfigBuilder(Resources.getResourceAsReader("mybatis.xml"));
         Configuration configuration = xmlConfigBuilder.parse();
@@ -156,6 +160,7 @@ public class ToolTest {
     }
 
     @Test
+    @DisplayName("测试ognl表达式")
     public void testOgnl() throws OgnlException {
         //Ognl保证3.3.3以上,否则必须实现MemberAccess接口
         TestModel testModel = new TestModel(1, "2023", "lemur", "123", "123456", "limu");
@@ -164,6 +169,7 @@ public class ToolTest {
     }
 
     @Test
+    @DisplayName("测试Mybatis对对象的包装，使用了外观模式")
     public void testMetaObject() {
         Object employee = new Employee(1, "lemur", new Dept(1, "人力资源部门"));
         MetaObject metaObject = MetaObject.forObject(employee,
@@ -176,6 +182,7 @@ public class ToolTest {
     }
 
     @Test
+    @DisplayName("测试Mybatis的错误链")
     public void testErrorContext() throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(10);
         CountDownLatch countDownLatch = new CountDownLatch(10);
@@ -204,6 +211,7 @@ public class ToolTest {
     }
 
     @Test
+    @DisplayName("测试MappedStatement")
     public void testMappedStatement() throws IOException {
 
         Configuration configuration = getConfiguration();
@@ -254,8 +262,8 @@ public class ToolTest {
 
     }
 
-    //使用TypeHandlerRegistry注册
     @Test
+    @DisplayName("测试TypeHandler，使用TypeHandlerRegistry注册")
     public void testTypeHandler() throws Exception {
         SqlSessionFactoryBuilder sqlSessionFactoryBuilder = new SqlSessionFactoryBuilder();
         SqlSessionFactory build = sqlSessionFactoryBuilder.build(Resources.getResourceAsReader("mybatis.xml"));
@@ -266,8 +274,8 @@ public class ToolTest {
         System.out.println(objects);
     }
 
-    //用来解析动态sql到静态sql
     @Test
+    @DisplayName("测试XMLLanguageDriver，用来解析动态sql到静态sql")
     public void testXMLLanguageDriver() throws Exception {
         XMLLanguageDriver xmlLanguageDriver = new XMLLanguageDriver();
         XPathParser xPathParser = new XPathParser(Resources.getResourceAsStream("sql.xml"));
@@ -279,8 +287,8 @@ public class ToolTest {
 
     }
 
-    //测试手动解析xml文件并查询
     @Test
+    @DisplayName("测试手动解析xml文件并查询")
     public void testParseXML() throws IOException {
         Configuration configuration = getConfiguration();
 
@@ -289,10 +297,6 @@ public class ToolTest {
 
         XMLLanguageDriver xmlLanguageDriver = new XMLLanguageDriver();
         SqlSource sqlSource = xmlLanguageDriver.createSqlSource(configuration, xNode, Account.class);
-
-        new ResultMapping.Builder(configuration, "id", "id", Integer.class);
-        new ResultMapping.Builder(configuration, "userName", "user_name", String.class);
-        new ResultMapping.Builder(configuration, "money", "money", Integer.class);
 
         List<ResultMapping> resultMappings = new ArrayList<>();
 
@@ -312,8 +316,8 @@ public class ToolTest {
         System.out.println(account);
     }
 
-    //解释sqlSession的创建
     @Test
+    @DisplayName("测试OpenSession的解析过程")
     public void testOpenSession() throws IOException {
         SqlSessionFactoryBuilder sqlSessionFactoryBuilder = new SqlSessionFactoryBuilder();
         SqlSessionFactory build = sqlSessionFactoryBuilder.build(Resources.getResourceAsReader("mybatis.xml"));

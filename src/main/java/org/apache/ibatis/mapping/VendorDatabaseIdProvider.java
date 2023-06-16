@@ -15,32 +15,31 @@
  */
 package org.apache.ibatis.mapping;
 
+import org.apache.ibatis.logging.Log;
+import org.apache.ibatis.logging.LogFactory;
+
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.sql.DataSource;
-
-import org.apache.ibatis.logging.Log;
-import org.apache.ibatis.logging.LogFactory;
-
 /**
  * Vendor DatabaseId provider.
- *
+ * <p>
  * It returns database product name as a databaseId.
  * 它能够返回数据库的产品名称作为databaseId
- *
+ * <p>
  * If the user provides a properties it uses it to translate database product name
  * 如果用户设置了properties，那该类会使用properties来翻译数据库产品名
  * key="Microsoft SQL Server", value="ms" will return "ms".
- *
+ * <p>
  * It can return null, if no database product name or
  * a properties was specified and no translation was found.
  *
  * @author Eduardo Macarron
- *
+ * <p>
  * vendor：摊贩;小贩;卖主;卖方
  * 返回数据库产品名
  */
